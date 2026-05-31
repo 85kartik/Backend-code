@@ -4,6 +4,7 @@ const {
   hashPassword,
   comparePassword,
 } = require("../helpers/authHelper");
+
 const RegisterController = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -25,14 +26,14 @@ const RegisterController = async (req, res) => {
         message: "User already registered",
       });
     }
-		 // HASH PASSWORD
+    // HASH PASSWORD
     const hashedPassword =
       await hashPassword(password);
     // create user
     const user = await userSchema.create({
       name,
       email,
-      password:hashedPassword,
+      password: hashedPassword,
     });
 
     return res.status(200).send({
