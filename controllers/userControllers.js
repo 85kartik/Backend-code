@@ -1,4 +1,5 @@
 const userSchema = require("../models/userSchema");
+const nodemailer = require("nodemailer");
 const {
   hashPassword,
   comparePassword,
@@ -96,7 +97,72 @@ const LoginController = async (req, res) => {
   }
 };
 
+const otpController = async (req, res) => {
+  const transport = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  });
+
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).send({
+        success: false,
+        message: "Enter Email",
+      });
+    }
+
+    const existingUser = await userSchema.findOne({ email });
+
+    if (!existingUser) {
+      return res.status(404).send({
+        success: false,
+        message: "User Not Found",
+      });
+    }
+
+    // Create OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    existingUser.otp = otp;
+    existingUser.otpExpire = Date.now() + 5 * 60 * 1000;
+
+    await existingUser.save();
+
+    // Send OTP Email
+    await transport.sendMail({
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Your Login OTP",
+      html: `
+        <h2>Your Login OTP</h2>
+        <h1>${otp}</h1>
+        <p>This OTP is valid for 5 minutes.</p>
+      `,
+    });
+
+    return res.status(200).send({
+      success: true,
+      message: "OTP sent to your email",
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).send({
+      success: false,
+      message: "Failed to send OTP",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   RegisterController,
   LoginController,
+  otpController
 };  
