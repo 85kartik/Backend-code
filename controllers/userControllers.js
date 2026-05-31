@@ -99,4 +99,4 @@ const LoginController = async (req, res) => {
 module.exports = {
   RegisterController,
   LoginController,
-};
+};  
