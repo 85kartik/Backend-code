@@ -1,3 +1,4 @@
 db.js
 authHelper.js
 .env
+node_modules
