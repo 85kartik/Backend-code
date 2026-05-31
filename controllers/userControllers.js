@@ -1,5 +1,4 @@
 const userSchema = require("../models/userSchema");
-const crypto = require("crypto");
 const {
   hashPassword,
   comparePassword,
